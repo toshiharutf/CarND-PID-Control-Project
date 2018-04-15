@@ -3,6 +3,7 @@
 #include "json.hpp"
 #include "PID.h"
 #include <math.h>
+#include <fstream>
 
 // for convenience
 using json = nlohmann::json;
@@ -30,12 +31,26 @@ std::string hasData(std::string s) {
 
 int main()
 {
+  //std::ofstream myfile;
+  //myfile.open ("parameters.txt");
+  
   uWS::Hub h;
+  PID steerPID;
+  PID gasPID;
+  
+  // Comfort mode
+  //double pSteer[3] = {0.12,0.00000,1.2};
+  //double pSpeed[3] = {0.8,0.0,3}; 
+  
+  // Sports mode
+  double pSteer[3] = {0.07,0.0001,1.1};
+  double pSpeed[3] = {1.0,0.0,1}; 
+  
+  steerPID.Init(pSteer);
+  gasPID.Init(pSpeed);
+  // TODO: Initialize the steerPID variable.
 
-  PID pid;
-  // TODO: Initialize the pid variable.
-
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&steerPID, &gasPID, &myfile](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -51,22 +66,40 @@ int main()
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
-          /*
-          * TODO: Calcuate steering value here, remember the steering value is
-          * [-1, 1].
-          * NOTE: Feel free to play around with the throttle and speed. Maybe use
-          * another PID controller to control the speed!
-          */
-          
-          // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          double gas;
+//////////////////////////////////////////////////////////////////////////////////
 
-          json msgJson;
-          msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
-          auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
-          ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+          steer_value = steerPID.Control(steerPID.p, cte);
+          
+          // A empirical relationship between the steering and gas was found
+          // so that the car drives well
+          double errorSpeed =  fabs(steer_value)*3 - 1.0;
+          gas = gasPID.Control(gasPID.p,errorSpeed);
+
+          //steer_value = steerPID.Tuning(steerPID.p, cte);
+          
+          // The simulator resets, but only if the Tuning function is called
+          if(steerPID.restartFlag){
+              // Write the parameters in the datalog file
+            myfile << steerPID.p[0] << ", " << steerPID.p[1] << ", " << steerPID.p[2] << ", " << std::endl;
+            std::string msg = "42[\"reset\",{}]";
+            ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+            steerPID.restartFlag = false;
+          }
+ ///////////////////////////////////////////////////////////////////////////////         
+          else{
+            // DEBUG
+            std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+            json msgJson;
+            msgJson["steering_angle"] = steer_value;
+            //msgJson["throttle"] = 0.4;
+            msgJson["throttle"] = gas;
+            auto msg = "42[\"steer\"," + msgJson.dump() + "]";
+            std::cout << msg << std::endl;
+            ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+          }
+          
+          if(gasPID.tryout > gasPID.tryoutMax*gasPID.nP){myfile.close(); }
         }
       } else {
         // Manual driving
@@ -112,3 +145,5 @@ int main()
   }
   h.run();
 }
+
+
