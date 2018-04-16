@@ -31,20 +31,20 @@ std::string hasData(std::string s) {
 
 int main()
 {
-  //std::ofstream myfile;
-  //myfile.open ("parameters.txt");
+  std::ofstream myfile;
+  myfile.open ("parameters.txt");
   
   uWS::Hub h;
   PID steerPID;
   PID gasPID;
   
   // Comfort mode
-  //double pSteer[3] = {0.12,0.00000,1.2};
-  //double pSpeed[3] = {0.8,0.0,3}; 
+  //double pSteer[3] = {0.12,0.00001,1.5};
+  //double pSpeed[3] = {0.5,0.0,4}; 
   
   // Sports mode
-  double pSteer[3] = {0.07,0.0001,1.1};
-  double pSpeed[3] = {1.0,0.0,1}; 
+  double pSteer[3] = {0.06,0.00001,1.1};
+  double pSpeed[3] = {1.0,0.0,4.0}; 
   
   steerPID.Init(pSteer);
   gasPID.Init(pSpeed);
@@ -68,13 +68,17 @@ int main()
           double steer_value;
           double gas;
 //////////////////////////////////////////////////////////////////////////////////
-
+          //std::cout << "Speed: " << speed << std::endl;
+          
           steer_value = steerPID.Control(steerPID.p, cte);
           
           // A empirical relationship between the steering and gas was found
           // so that the car drives well
-          double errorSpeed =  fabs(steer_value)*3 - 1.0;
-          gas = gasPID.Control(gasPID.p,errorSpeed);
+          //double errorSpeed =  fabs(steer_value)*3 - 1.0;
+          double errorSpeed = speed/100.0 - (1.0-2*fabs(steer_value));
+          gas = speed/100.0 + gasPID.Control(gasPID.p,errorSpeed);
+          if (gas > 1.0) gas = 1.0;
+          if(gas < -1.0) gas =-1.0;
 
           //steer_value = steerPID.Tuning(steerPID.p, cte);
           
