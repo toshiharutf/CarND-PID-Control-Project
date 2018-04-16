@@ -8,7 +8,7 @@ The PID controller was implemented within the PID class object. Then, two PID co
 The tuning for each controller was done in two steps. First, an automatic tuning algorithm was used. This function is also within the PID class, named as "Tuning". The front-end of the Tuning function is almost exactly as the Controls one, as they both output the control signal for the vehicle. However, the Tuning function implements a simple Twiddle algorithm. 
 In the first tuning step, some preliminary gain values are obtained. Since the Twiddle algorithm is slow, after acceptable values are obstained, a final manual tuning was made. 
 
-The human perspective also influences the type of gains wanted. In this project, I present two set of gains: **comfort**, and **sports**  mode"". As you may wonder, the in the sports mode, the car goes faster, and it brakes later in the curves. Comfort mode is much more conservative. Videos of the simulations are shown below.
+The human perspective also influences the type of gains wanted. In this project, two set of gains are presented: **comfort**, and **sports**  mode. As you may wonder, in the sports mode, the car goes faster, and it brakes later in the curves. Comfort mode is much more conservative. Videos of the simulations are shown below.
 
 [Youtube link to the comfort mode simulation](https://youtu.be/9d7J8sOaryk)
 
