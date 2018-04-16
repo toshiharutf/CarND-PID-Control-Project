@@ -72,9 +72,8 @@ int main()
           
           steer_value = steerPID.Control(steerPID.p, cte);
           
-          // A empirical relationship between the steering and gas was found
-          // so that the car drives well
-          //double errorSpeed =  fabs(steer_value)*3 - 1.0;
+          // If the car turns at 100% to either left or right, the cars brakes at 100%, aso
+
           double errorSpeed = speed/100.0 - (1.0-2*fabs(steer_value));
           gas = speed/100.0 + gasPID.Control(gasPID.p,errorSpeed);
           if (gas > 1.0) gas = 1.0;
