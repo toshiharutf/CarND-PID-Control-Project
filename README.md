@@ -15,18 +15,21 @@ The human perspective also influences the type of gains wanted. In this project,
 [Youtube link to the sports mode simulation](https://youtu.be/XjY3zDpkGr0)
 
 Another thing that influences the way the car drives is how the inputs (or error) is computed. The CTE (cross-track error) is provided by the simulator, although, we don't know how it is actually computed. Is this CTE computed from the geometrical center of the car? 
-Because this project also uses a PID controller for the gas, the input used in this project is proportional to the steering control signal, that comes from the first PID controller. When driving, the smaller the curve radius is (curvature), the slower you should drive to avoid oversteering. So, a simple mathematical relationship between the absolute value of the steering and the error for the gas controller was made. The setpoint value for the gas controller was set to the maximum, although the car only top to 75 mph in some cases. A diagram of both PID controllers can be seen below.
+Because this project also uses a PID controller for the gas, the input used in this project is proportional to the steering control signal, that comes from the first PID controller. When driving, the smaller the curve radius is (curvature), the slower you should drive to avoid oversteering. So, a simple mathematical relationship between the absolute value of the steering and the error for the gas controller was made. The setpoint value for the gas controller was set to the maximum, although the car only top to 75 mph in the straigh segments. A diagram of both PID controllers can be seen below.
 
 ![alt text](images/PID_diagram.png)
 
 ## Tuning and influence of each parameter in the perfomance of the controller
 ### a) Proportional:
+
 	This is the most important parameter in the PID controller. The steering or gas will react inmediatley and directly proportionally to the deviation from the setpoint. When you start tuning the PID controller, you should start with this one, while setting the others to zero.
 
 ### b) Integral:
+
 	Most of the PID controllers used in general are just PI controllers. The integral component is necessary (but not sufficient) to accomplish a theoretical zero error. For our project, since the integral component is the summation of the past errors, the longer the car stays aways from the path's center, the higher the steering angle. However, if this value is too high, the behavior can be oscillatory.
 
 ### c) Derivative:
+
 	As mentioned earlier, most PID controllers are just PI. The derivative component allows the system to react faster to sudden changes. However, the noise also presents spikes in the sensor inputs, which are amplified by the derivative component. As you may see in the code, the derivative component is very small. High values produce oscillaory response.
 
 ---
